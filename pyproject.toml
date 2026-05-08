@@ -1,0 +1,16 @@
+[project]
+name = "proyecto-var"
+version = "0.1.0"
+description = "Sistema de cálculo de Value at Risk (VaR) con simulación histórica"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=1.1.0",
+    "yfinance>=0.2.50",
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "plotly>=5.24.0",
+    "gradio>=5.9.1",
+    "prefect>=3.0.0",
+    "requests>=2.32.0",
+]
