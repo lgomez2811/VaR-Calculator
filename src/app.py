@@ -21,37 +21,6 @@ from graficos import (
     grafico_correlacion,
 )
 
-# ─── Portafolios de ejemplo ───────────────────────────────────────────────────
-PORTAFOLIOS_EJEMPLO = {
-    "Warren Buffett (estilo Berkshire)": {
-        "tickers": "AAPL, BAC, KO, AXP, CVX",
-        "pesos": "0.40, 0.20, 0.15, 0.15, 0.10",
-        "valor": 1_000_000,
-    },
-    "Tech Growth (Cathie Wood estilo ARK)": {
-        "tickers": "TSLA, NVDA, META, AMZN, GOOGL",
-        "pesos": "0.25, 0.25, 0.20, 0.15, 0.15",
-        "valor": 500_000,
-    },
-    "Portafolio Conservador (Bonos + Blue chips)": {
-        "tickers": "JNJ, PG, WMT, VZ, T",
-        "pesos": "0.25, 0.25, 0.20, 0.15, 0.15",
-        "valor": 250_000,
-    },
-    "S&P 500 Top 5": {
-        "tickers": "AAPL, MSFT, NVDA, AMZN, META",
-        "pesos": "0.25, 0.25, 0.20, 0.15, 0.15",
-        "valor": 100_000,
-    },
-}
-
-
-def cargar_ejemplo(nombre_ejemplo):
-    if nombre_ejemplo == "— Selecciona un portafolio de ejemplo —":
-        return gr.update(), gr.update(), gr.update()
-    ejemplo = PORTAFOLIOS_EJEMPLO[nombre_ejemplo]
-    return ejemplo["tickers"], ejemplo["pesos"], ejemplo["valor"]
-
 
 def calcular_var(
     tickers_texto: str,
@@ -106,6 +75,8 @@ def calcular_var(
     ])
 
     signo = "$"
+
+    # ── Resumen con métricas destacadas ─────────────────────────────────────
     resumen = f"""
 ## ✅ Cálculo completado
 
@@ -118,12 +89,20 @@ def calcular_var(
 
 ---
 
-### Resultados de riesgo
-
-| Métrica | Porcentaje | Dólares |
-|---------|-----------|---------|
-| **VaR ({nivel_confianza:.0f}%)** | {abs(var_pct):.3%} | {signo}{var_dinero:,.2f} |
-| **CVaR — Expected Shortfall** | {abs(cvar_pct):.3%} | {signo}{cvar_dinero:,.2f} |
+<div class="metrics-highlight">
+  <div class="metric-card var-card">
+    <div class="metric-label">VaR ({nivel_confianza:.0f}%)</div>
+    <div class="metric-value-pct">{abs(var_pct):.3%}</div>
+    <div class="metric-value-usd">{signo}{var_dinero:,.2f} USD</div>
+    <div class="metric-desc">Pérdida máxima en 1 día con {nivel_confianza:.0f}% de confianza</div>
+  </div>
+  <div class="metric-card cvar-card">
+    <div class="metric-label">CVaR — Expected Shortfall</div>
+    <div class="metric-value-pct">{abs(cvar_pct):.3%}</div>
+    <div class="metric-value-usd">{signo}{cvar_dinero:,.2f} USD</div>
+    <div class="metric-desc">Pérdida promedio en el {100 - nivel_confianza:.0f}% de peores escenarios</div>
+  </div>
+</div>
 
 ---
 
@@ -387,48 +366,110 @@ hr {
     align-items: center;
 }
 
-.footer-pill {
-    display: inline-block;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 999px;
-    padding: 3px 12px;
-    font-size: 11px;
-    font-family: 'IBM Plex Mono', monospace;
-    color: var(--text-muted);
-    letter-spacing: 0.06em;
-}
-
-/* ── Status pipeline ── */
-.pipeline-status {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-}
-
-.pipeline-step {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 3px 10px;
-    color: var(--text-secondary);
-}
-
-.pipeline-arrow {
-    color: var(--text-muted);
-}
-
 /* ── Scroll ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--bg-card); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── CARDS DE MÉTRICAS DESTACADAS ── */
+.metrics-highlight {
+    display: flex;
+    gap: 1.25rem;
+    margin: 1.25rem 0;
+    flex-wrap: wrap;
+}
+
+.metric-card {
+    flex: 1;
+    min-width: 220px;
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+}
+
+.var-card {
+    background: linear-gradient(135deg, rgba(0,212,170,0.08) 0%, rgba(0,212,170,0.03) 100%);
+    border: 1px solid rgba(0,212,170,0.3);
+}
+
+.var-card::before {
+    background: linear-gradient(90deg, transparent, #00D4AA, transparent);
+}
+
+.cvar-card {
+    background: linear-gradient(135deg, rgba(249,115,22,0.08) 0%, rgba(249,115,22,0.03) 100%);
+    border: 1px solid rgba(249,115,22,0.3);
+}
+
+.cvar-card::before {
+    background: linear-gradient(90deg, transparent, #F97316, transparent);
+}
+
+.metric-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.metric-value-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.75rem;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.02em;
+}
+
+.var-card .metric-value-pct {
+    color: #00D4AA;
+}
+
+.cvar-card .metric-value-pct {
+    color: #F97316;
+}
+
+.metric-value-usd {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.metric-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.4;
+}
+
+/* ── Código en metodología ── */
+.prose code, .prose pre, code, pre {
+    background: var(--bg-card) !important;
+    color: var(--accent-teal) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 13px !important;
+}
+
+.prose pre code, pre code {
+    background: transparent !important;
+    border: none !important;
+    color: var(--accent-teal) !important;
+}
 """
 
 # ─── Tema base ────────────────────────────────────────────────────────────────
@@ -483,21 +524,14 @@ with gr.Blocks(
     title="VaR Terminal — Risk Analytics",
 ) as demo:
 
-    # ── Header ──────────────────────────────────────────────────────────────
+    # ── Header — sin pipeline status ni "Medallion" ─────────────────────────
     gr.HTML("""
     <div class="header-container">
         <div class="header-ticker">▸ VAR TERMINAL &nbsp;·&nbsp; RISK ANALYTICS SYSTEM &nbsp;·&nbsp; HISTORICAL SIMULATION</div>
         <h1 class="header-title">Value at Risk Calculator</h1>
         <p class="header-subtitle">
-            Simulación histórica · Arquitectura Medallion (Bronze → Silver → Gold) · Datos: Yahoo Finance
+            Simulación histórica · Datos: Yahoo Finance
         </p>
-        <div style="margin-top:1.25rem;">
-            <span class="pipeline-step">🟡 Bronze</span>
-            <span class="pipeline-arrow">→</span>
-            <span class="pipeline-step">⚪ Silver</span>
-            <span class="pipeline-arrow">→</span>
-            <span class="pipeline-step">🟡 Gold</span>
-        </div>
     </div>
     """)
 
@@ -508,18 +542,6 @@ with gr.Blocks(
 
         # ── TAB 1: Configuración ─────────────────────────────────────────
         with gr.TabItem("⚙  Configuración del Portafolio", id="config"):
-
-            # Ejemplo rápido
-            with gr.Row():
-                ejemplo_dropdown = gr.Dropdown(
-                    choices=["— Selecciona un portafolio de ejemplo —"] + list(PORTAFOLIOS_EJEMPLO.keys()),
-                    value="— Selecciona un portafolio de ejemplo —",
-                    label="Carga rápida — Portafolios de ejemplo",
-                    scale=3,
-                    container=True,
-                )
-
-            gr.HTML('<div style="height:1rem;"></div>')
 
             # Inputs principales
             with gr.Row(equal_height=True):
@@ -556,13 +578,14 @@ with gr.Blocks(
                         minimum=1_000,
                         info="Capital total invertido en dólares",
                     )
+                    # CAMBIO 3: Período ampliado a 5 años (1825 días)
                     periodo_slider = gr.Slider(
                         minimum=90,
-                        maximum=730,
+                        maximum=1825,
                         value=365,
                         step=30,
                         label="Período histórico (días)",
-                        info="252 días = 1 año bursátil · Más datos = mayor precisión estadística",
+                        info="252 días = 1 año bursátil · 365 = 1 año · 730 = 2 años · 1825 = 5 años",
                     )
 
             gr.HTML('<div style="height:1.25rem;"></div>')
@@ -610,7 +633,7 @@ with gr.Blocks(
 ### ¿Qué es el VaR histórico?
 El **VaR (Value at Risk)** histórico estima la pérdida máxima esperada de un portafolio durante un período dado, a un nivel de confianza determinado, usando la distribución empírica de retornos pasados.
 
-### Pipeline de datos (Arquitectura Medallion)
+### Pipeline de datos
 
 | Capa | Herramienta | Proceso |
 |------|------------|---------|
@@ -662,12 +685,6 @@ El CVaR (también llamado *Expected Shortfall*) es una métrica más conservador
     """)
 
     # ── Eventos ───────────────────────────────────────────────────────────
-    ejemplo_dropdown.change(
-        fn=cargar_ejemplo,
-        inputs=[ejemplo_dropdown],
-        outputs=[tickers_input, pesos_input, valor_input],
-    )
-
     calcular_btn.click(
         fn=calcular_var,
         inputs=[tickers_input, pesos_input, confianza_slider, valor_input, periodo_slider],
