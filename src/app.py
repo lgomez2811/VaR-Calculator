@@ -46,6 +46,13 @@ def calcular_var(
         )
 
     total_pesos = sum(pesos_raw)
+    if abs(total_pesos - 1.0) > 0.001 and abs(total_pesos - 100.0) > 0.1:
+        return (
+            f"❌ Los pesos suman **{total_pesos:.4f}** ({total_pesos*100:.2f}%). "
+            f"Deben sumar **1.0** (ej: 0.30, 0.70) o **100** (ej: 30, 70). "
+            f"Por favor ajusta los valores antes de continuar.",
+            None, None, None, None, None
+        )
     pesos_norm = [p / total_pesos for p in pesos_raw]
     pesos_dict = dict(zip(tickers, pesos_norm))
 
