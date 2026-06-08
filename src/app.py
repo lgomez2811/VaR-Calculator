@@ -443,7 +443,7 @@ with gr.Blocks(title="VaR Terminal — Risk Analytics") as demo:
             <div class="info-semanal">
                 <strong>PORTAFOLIO FIJO:</strong> 30% F (Ford Motor) · 70% UEC (Uranium Energy Corp)<br>
                 <strong>OBJETIVO:</strong> Declarar el VaR semanal y monitorear que no se viole durante 5 días hábiles.<br>
-                <strong>REGLA:</strong> Si la pérdida acumulada real supera el VaR en algún día → intento consumido. Tienen 2 intentos.
+
             </div>
             """)
 
@@ -454,7 +454,7 @@ with gr.Blocks(title="VaR Terminal — Risk Analytics") as demo:
                     confianza_semanal = gr.Slider(minimum=90, maximum=99, value=95, step=1,
                         label="Nivel de confianza (%)",
                         info="A mayor confianza → VaR más alto → más difícil de violar")
-                    intento_radio     = gr.Radio(choices=[1, 2], value=1, label="Número de intento")
+                    intento_radio = gr.Number(value=1, minimum=1, precision=0, label="Número de intento")
 
                 with gr.Column(scale=3):
                     gr.HTML("""
